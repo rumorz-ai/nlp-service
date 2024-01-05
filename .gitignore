@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*nltk_data
 
 # C extensions
 *.so
