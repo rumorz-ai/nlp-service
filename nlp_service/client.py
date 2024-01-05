@@ -1,12 +1,19 @@
 import os
+import time
+
 import nltk
 import aiohttp
+from aiohttp import ClientTimeout
+
+from smartpy.utility.log_util import getLogger
 
 NLTK_CACHE_DIR = os.path.join(os.path.dirname(__file__), 'nltk_cache')
 SENTENCE_TRANSFORMERS_CACHE_DIR = os.path.join(os.path.dirname(__file__), 'sentence_transformers_cache')
 
 NLTK_RESOURCES = ['brown', 'wordnet', 'stopwords', 'punkt', 'words', 'vader_lexicon']
 DEFAULT_EMBEDDING_MODEL = 'sentence-transformers/all-MiniLM-L6-v2'
+
+logger = getLogger(__name__)
 
 
 # Lazy loading function
@@ -31,10 +38,35 @@ class NLPService:
         self.nltk_cache_dir = nltk_cache_dir
         self.nltk_downloaded = False
 
-    async def _send_request(self, endpoint, data):
-        async with aiohttp.ClientSession() as session:
+    async def _send_request(self, endpoint, data={}, timeout_seconds=10):
+        timeout = ClientTimeout(total=timeout_seconds)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.post(self.base_url + '/' + endpoint, json=data) as response:
                 return await response.json()
+
+    async def is_running(self):
+        try:
+            result = await self._send_request('ping')
+            if result['status'] == 'success':
+                return True
+            else:
+                return False
+        except Exception as e:
+            logger.debug(e)
+            return False
+
+    async def wait_for_start(self,
+                             n_trials=10):
+        for i in range(n_trials):
+            logger.info(f"Checking if NLP services are running... {i}")
+            if await self.is_running() is True:
+                logger.info("NLP services are running")
+                return True
+            else:
+                logger.info("Waiting for NLP services to start...")
+                time.sleep(10)
+            if i == 9:
+                raise Exception("NLP services not running")
 
     def _download_nltk(self,
                        resources=NLTK_RESOURCES):
@@ -72,3 +104,5 @@ class NLPService:
             return model.encode(text)
         else:
             raise ValueError(f'Unknown source: {source}')
+
+

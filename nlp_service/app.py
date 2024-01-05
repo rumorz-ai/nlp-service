@@ -38,6 +38,11 @@ def load_embedding_model(model, cache_dir):
     return load_embedding_model.model
 
 
+@app.post("/ping")
+async def ping():
+    return {"status": "success"}
+
+
 @app.post("/embeddings")
 async def get_embeddings(embeddings_model: EmbeddingsModel):
     text = embeddings_model.text
