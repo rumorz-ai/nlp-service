@@ -13,7 +13,7 @@ Deploy 4 containers with 4GB of RAM and run NLP tasks on all of them.
 Total RAM used = 4 containers x 4Gb = **16Gb of RAM**
 
 - **Option 2 (with NLP microservice)**: Deploy 4 containers with 1Gb of RAM + 1 NLP microservice with 4Gb of RAM
-Total RAM used = 4 containers x 4Gb = 4 containers x 1Gb + 1 container (nlp service) x 4Gb = **8Gb of RAM**
+Total RAM used = 4 containers x 1Gb + 1 container (nlp service) x 4Gb = **8Gb of RAM**
 
 By using an NLP microservice in this scenario, you are saving the costs of 8Gb of RAM.  Besides costs, there are many other benefits to isolating NLP models and Transformers behind a microservice:
 - Isolated dependencies: you can install any version of torch, sentence-transformers etc without worrying about dependency conflicts with your application
