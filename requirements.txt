@@ -1,0 +1,6 @@
+fastapi
+gunicorn
+asgiref
+starlette
+nltk
+sentence-transformers

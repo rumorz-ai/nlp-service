@@ -1,12 +1,11 @@
 import os
 import nltk
-import asyncio
 import aiohttp
 
-NLTK_CACHE_DIR = os.path.join(os.path.dirname(__file__), 'nltk_data')
-NLTK_RESOURCES = ['brown', 'wordnet', 'stopwords', 'punkt', 'words', 'vader_lexicon']
-
+NLTK_CACHE_DIR = os.path.join(os.path.dirname(__file__), 'nltk_cache')
 SENTENCE_TRANSFORMERS_CACHE_DIR = os.path.join(os.path.dirname(__file__), 'sentence_transformers_cache')
+
+NLTK_RESOURCES = ['brown', 'wordnet', 'stopwords', 'punkt', 'words', 'vader_lexicon']
 DEFAULT_EMBEDDING_MODEL = 'sentence-transformers/all-MiniLM-L6-v2'
 
 
@@ -16,7 +15,7 @@ def load_embedding_model(model, cache_folder=SENTENCE_TRANSFORMERS_CACHE_DIR):
         from sentence_transformers import SentenceTransformer
         load_embedding_model.model = SentenceTransformer(
             model,
-            cache_folder
+            cache_folder=cache_folder
         )
     return load_embedding_model.model
 
@@ -26,24 +25,31 @@ class NLPService:
     def __init__(self,
                  base_url='http://localhost:2222',
                  sentence_transformers_cache_dir=SENTENCE_TRANSFORMERS_CACHE_DIR,
-                 nltk_cache_dir=NLTK_CACHE_DIR,):
+                 nltk_cache_dir=NLTK_CACHE_DIR, ):
         self.base_url = base_url
         self.sentence_transformers_cache_dir = sentence_transformers_cache_dir
         self.nltk_cache_dir = nltk_cache_dir
         self.nltk_downloaded = False
 
-    def download_nltk(self,
-                      resources=NLTK_RESOURCES):
+    async def _send_request(self, endpoint, data):
+        async with aiohttp.ClientSession() as session:
+            async with session.post(self.base_url + '/' + endpoint, json=data) as response:
+                return await response.json()
+
+    def _download_nltk(self,
+                       resources=NLTK_RESOURCES):
         # Set NLTK_DIR to the current_dir
         os.makedirs(self.nltk_cache_dir, exist_ok=True)
         nltk.data.path.append(self.nltk_cache_dir)
         for res in resources:
             nltk.download(res, download_dir=self.nltk_cache_dir)
 
-    async def _send_request(self, endpoint, data):
-        async with aiohttp.ClientSession() as session:
-            async with session.post(self.base_url + '/' + endpoint, json=data) as response:
-                return await response.json()
+    @property
+    def nltk(self):
+        if not self.nltk_downloaded:
+            self._download_nltk()
+            self.nltk_downloaded = True
+        return nltk
 
     async def get_embeddings(self,
                              text,
@@ -66,10 +72,3 @@ class NLPService:
             return model.encode(text)
         else:
             raise ValueError(f'Unknown source: {source}')
-
-    @property
-    def nltk(self):
-        if not self.nltk_downloaded:
-            self.download_nltk()
-            self.nltk_downloaded = True
-        return nltk
