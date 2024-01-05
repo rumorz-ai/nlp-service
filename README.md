@@ -6,6 +6,8 @@ When deploying an app with NLP features to production, there are many considerat
 - Library dependencies and conflicts
 - Model caching
 
+## Benefits of an NLP microservice
+
 #### Here is a sample scenario illustrating the benefits of an NLP microservice:
 Imagine your application runs on 4 containers (backend, web scraper, data ETL, ops worker) and ALL of these containers need to run NLP tasks. Your NLP models have a RAM requirement of 4Gb minimum, but your app containers can run on 1Gb of RAM. When deploying, you can either:
 
@@ -29,8 +31,11 @@ docker build -t nlp-service .
 
 ## Example
 
+The repo includes a FastAPI app with an /embeddings endpoint, as well as a python client to call the service. If you don't want to rely on the microsevice, you can still call the NLP models by using source='local'. This will download the models to the specified cache directories and run the NLP task on the same processor as your app.
+
+
 ```python
-        nlp_service = NLPService()
-        embeddings = loop.run_until_complete(nlp_service.get_embeddings("Your text here", source='app'))
-        embeddings = loop.run_until_complete(nlp_service.get_embeddings("Your text here", source='local'))
+nlp_service = NLPService()
+embeddings = loop.run_until_complete(nlp_service.get_embeddings("Your text here", source='app'))
+embeddings = loop.run_until_complete(nlp_service.get_embeddings("Your text here", source='local'))
 ```
