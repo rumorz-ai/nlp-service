@@ -45,7 +45,7 @@ async def ping():
 
 class EmbeddingsModel(BaseModel):
     text: str
-    model: str
+    model: str = "sentence-transformers/all-MiniLM-L6-v2"
 
 @app.post("/embeddings")
 async def get_embeddings(embeddings_model: EmbeddingsModel):
@@ -63,4 +63,4 @@ async def get_embeddings(embeddings_model: EmbeddingsModel):
 if __name__ == "__main__":
     uvicorn.run(app,
                 host="0.0.0.0",
-                port=2222)
+                port=80)
