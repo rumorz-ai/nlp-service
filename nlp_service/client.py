@@ -54,8 +54,8 @@ class NLPService:
             logger.debug(e)
             return False
 
-    async def wait_for_start(self,
-                             n_trials=10):
+    async def ping(self,
+                   n_trials=10):
         for i in range(n_trials):
             logger.info(f"Checking if NLP services are running... {i}")
             if await self.is_running() is True:

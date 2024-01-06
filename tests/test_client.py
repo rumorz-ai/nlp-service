@@ -11,12 +11,11 @@ class TestClient(unittest.TestCase):
         self.nlp_service = NLPService()
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
-        self.loop.run_until_complete(self.nlp_service.wait_for_start())
+        self.loop.run_until_complete(self.nlp_service.ping())
 
     def test_client(self):
         embeddings = self.loop.run_until_complete(self.nlp_service.get_embeddings("Your text here", source='app'))
         embeddings = self.loop.run_until_complete(self.nlp_service.get_embeddings("Your text here", source='local'))
-
 
     def test_nltk(self):
         loop = asyncio.get_event_loop()

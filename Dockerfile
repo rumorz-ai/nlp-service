@@ -4,12 +4,14 @@ RUN mkdir /app
 
 WORKDIR /app
 
-# Copy only the requirements.txt first to leverage Docker cache
+# Cache
+RUN pip install sentence-transformers
+
 COPY requirements.txt /app/
 RUN pip install -r requirements.txt
 
 COPY . .
 
-EXPOSE 2222
+EXPOSE 80
 
-CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:2222", "nlp_service.app:app", "--timeout", "120"]
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:80", "nlp_service.app:app", "--timeout", "120"]

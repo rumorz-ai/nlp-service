@@ -4,6 +4,5 @@ uvicorn
 asgiref
 starlette
 nltk
-sentence-transformers
 
 smartpy @ git+https://github.com/zozoheir/smartpy.git@releases

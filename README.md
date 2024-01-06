@@ -39,3 +39,14 @@ nlp_service = NLPService()
 embeddings = loop.run_until_complete(nlp_service.get_embeddings("Your text here", source='app'))
 embeddings = loop.run_until_complete(nlp_service.get_embeddings("Your text here", source='local'))
 ```
+
+Deploy as Azure Container App 
+```
+az containerapp create \
+  --name nlp-service \
+  --resource-group rumorz \
+  --image rumorzimages.azurecr.io/nlp-service:latest \
+  --registry-server rumorzimages.azurecr.io \
+  --ingress external \
+  --target-port 2222
+```
