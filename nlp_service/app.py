@@ -21,10 +21,11 @@ app.add_middleware(
 )
 
 
-class EmbeddingsModel(BaseModel):
-    text: str
-    model: str
-    cache_dir: str
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request, exc):
+    print(f"Request {request.method} {request.url} got exception: {exc}")
+    return JSONResponse(content={"message": str(exc)}, status_code=exc.status_code)
+
 
 
 # Lazy loading function
@@ -43,6 +44,12 @@ async def ping():
     return {"status": "success"}
 
 
+
+class EmbeddingsModel(BaseModel):
+    text: str
+    model: str
+    cache_dir: str
+
 @app.post("/embeddings")
 async def get_embeddings(embeddings_model: EmbeddingsModel):
     text = embeddings_model.text
@@ -55,13 +62,6 @@ async def get_embeddings(embeddings_model: EmbeddingsModel):
             "embeddings": model.encode(text).tolist()
         }
     }
-
-
-
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request, exc):
-    print(f"Request {request.method} {request.url} got exception: {exc}")
-    return JSONResponse(content={"message": str(exc)}, status_code=exc.status_code)
 
 
 if __name__ == "__main__":

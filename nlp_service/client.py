@@ -11,7 +11,6 @@ NLTK_CACHE_DIR = os.path.join(os.path.dirname(__file__), 'nltk_cache')
 SENTENCE_TRANSFORMERS_CACHE_DIR = os.path.join(os.path.dirname(__file__), 'sentence_transformers_cache')
 
 NLTK_RESOURCES = ['brown', 'wordnet', 'stopwords', 'punkt', 'words', 'vader_lexicon']
-DEFAULT_EMBEDDING_MODEL = 'sentence-transformers/all-MiniLM-L6-v2'
 
 logger = getLogger(__name__)
 
@@ -85,7 +84,7 @@ class NLPService:
 
     async def get_embeddings(self,
                              text,
-                             model=DEFAULT_EMBEDDING_MODEL,
+                             model='sentence-transformers/all-MiniLM-L6-v2',
                              source='app'):
         if source == 'app':
             data = {
@@ -99,7 +98,7 @@ class NLPService:
             else:
                 return response['data']['embeddings']
 
-        elif source == 'local':
+        elif source == 'cache':
             model = load_embedding_model(model=model, cache_folder=self.sentence_transformers_cache_dir)
             return model.encode(text)
         else:
