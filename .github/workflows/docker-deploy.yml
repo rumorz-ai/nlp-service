@@ -1,0 +1,26 @@
+name: Build and Deploy to Azure
+
+on:
+  push:
+    branches:
+      - prod
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Login to Azure Container Registry
+      uses: azure/docker-login@v1
+      with:
+        login-server: rumorzimages.azurecr.io
+        username: rumorzimages
+        password: T8j47cGTx77+7+c4/xePDz9+1LnHGiLHYQbbUGwK0E+ACRAFROhx
+
+    - name: Build and Push Docker image
+      run: |
+        docker build -t nlp-service .
+        docker tag nlp-service rumorzimages.azurecr.io/nlp-service
+        docker push rumorzimages.azurecr.io/nlp-service
