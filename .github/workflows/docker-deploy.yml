@@ -31,4 +31,3 @@ jobs:
         docker build -t nlp-service .
         docker tag nlp-service rumorzimages.azurecr.io/nlp-service
         docker push rumorzimages.azurecr.io/nlp-service
-        

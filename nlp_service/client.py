@@ -3,6 +3,7 @@ import time
 
 import nltk
 import aiohttp
+import numpy as np
 from aiohttp import ClientTimeout
 
 from smartpy.utility.log_util import getLogger
@@ -28,13 +29,22 @@ def load_embedding_model(model, cache_folder=SENTENCE_TRANSFORMERS_CACHE_DIR):
 
 class NLPService:
 
+    CACHE = 'cache'
+    API = 'api'
+
+    """
+    This class is used to run NLP tasks, manage NLP libraries and model caching
+    and interact with the NLP microservice.
+    Libraries included:
+    - NLTK
+    - Sentence Transformers: get_embeddings
+    """
+
     def __init__(self,
-                 base_url='http://localhost:2222',
-                 sentence_transformers_cache_dir=SENTENCE_TRANSFORMERS_CACHE_DIR,
-                 nltk_cache_dir=NLTK_CACHE_DIR, ):
+                 source=None,
+                 base_url='http://0.0.0.0:80'):
+        self.source = source
         self.base_url = base_url
-        self.sentence_transformers_cache_dir = sentence_transformers_cache_dir
-        self.nltk_cache_dir = nltk_cache_dir
         self.nltk_downloaded = False
 
     async def _send_request(self, endpoint, data={}, timeout_seconds=10):
@@ -54,9 +64,13 @@ class NLPService:
             logger.debug(e)
             return False
 
-    async def ping(self,
-                   n_trials=10):
-        for i in range(n_trials):
+    async def check_api_status(self,
+                               n_trials=10):
+
+        i=0
+        while i < n_trials:
+            i += 1
+
             logger.info(f"Checking if NLP services are running... {i}")
             if await self.is_running() is True:
                 logger.info("NLP services are running")
@@ -64,16 +78,17 @@ class NLPService:
             else:
                 logger.info("Waiting for NLP services to start...")
                 time.sleep(10)
-            if i == 9:
-                raise Exception("NLP services not running")
+
+            if i == n_trials:
+                 raise Exception("NLP services not running")
 
     def _download_nltk(self,
                        resources=NLTK_RESOURCES):
         # Set NLTK_DIR to the current_dir
-        os.makedirs(self.nltk_cache_dir, exist_ok=True)
-        nltk.data.path.append(self.nltk_cache_dir)
+        os.makedirs(os.environ['NLP_CACHE_DIR'], exist_ok=True)
+        nltk.data.path.append(os.environ['NLP_CACHE_DIR'])
         for res in resources:
-            nltk.download(res, download_dir=self.nltk_cache_dir)
+            nltk.download(res, download_dir=os.environ['NLP_CACHE_DIR'])
 
     @property
     def nltk(self):
@@ -84,24 +99,18 @@ class NLPService:
 
     async def get_embeddings(self,
                              text,
-                             model='sentence-transformers/all-MiniLM-L6-v2',
-                             source='app'):
-        if source == 'app':
+                             model='sentence-transformers/all-MiniLM-L6-v2') -> np.array:
+        if self.source == self.API:
             data = {
                 'text': text,
                 'model': model,
-                'cache_dir': self.sentence_transformers_cache_dir
             }
             response = await self._send_request(endpoint='embeddings', data=data)
             if response['status'] != 'success':
                 raise ValueError(f'Error in response: {response}')
             else:
-                return response['data']['embeddings']
-
-        elif source == 'cache':
-            model = load_embedding_model(model=model, cache_folder=self.sentence_transformers_cache_dir)
+                return np.array(response['data']['embeddings'])
+        elif self.source == self.CACHE:
+            model = load_embedding_model(model=model)
             return model.encode(text)
-        else:
-            raise ValueError(f'Unknown source: {source}')
-
 

@@ -1,4 +1,4 @@
-from typing import Optional
+import os
 
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,14 +27,13 @@ async def http_exception_handler(request, exc):
     return JSONResponse(content={"message": str(exc)}, status_code=exc.status_code)
 
 
-
 # Lazy loading function
-def load_embedding_model(model, cache_dir):
+def load_embedding_model(model):
     if not hasattr(load_embedding_model, "model"):
         from sentence_transformers import SentenceTransformer
         load_embedding_model.model = SentenceTransformer(
             model,
-            cache_dir
+            os.environ['NLP_CACHE_DIR']
         )
     return load_embedding_model.model
 
@@ -44,18 +43,15 @@ async def ping():
     return {"status": "success"}
 
 
-
 class EmbeddingsModel(BaseModel):
     text: str
     model: str
-    cache_dir: str
 
 @app.post("/embeddings")
 async def get_embeddings(embeddings_model: EmbeddingsModel):
     text = embeddings_model.text
     model = embeddings_model.model
-    cache_dir = embeddings_model.cache_dir
-    model = load_embedding_model(model, cache_dir)
+    model = load_embedding_model(model)
     return {
         "status": "success",
         "data":{
