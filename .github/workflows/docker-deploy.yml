@@ -19,8 +19,16 @@ jobs:
         username: rumorzimages
         password: T8j47cGTx77+7+c4/xePDz9+1LnHGiLHYQbbUGwK0E+ACRAFROhx
 
+    - uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
     - name: Build and Push Docker image
       run: |
         docker build -t nlp-service .
         docker tag nlp-service rumorzimages.azurecr.io/nlp-service
         docker push rumorzimages.azurecr.io/nlp-service
+        
