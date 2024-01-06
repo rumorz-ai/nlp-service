@@ -10,6 +10,6 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-RUN pip install uvicorn
+EXPOSE 2222
 
 CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:2222", "nlp_service.app:app", "--timeout", "120"]
