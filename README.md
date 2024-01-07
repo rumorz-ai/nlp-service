@@ -23,10 +23,11 @@ By using an NLP microservice in this scenario, you are saving the costs of 8Gb o
 - Faster builds for your app by removing dependency to heavy libraries.
 - Asynchronous tasks: instead of blocking your process to run an NLP task, you'd send an async request to the microservice, allowing you to run other tasks while waiting for the model response.
 
-## Build
+## Build and run
 
 ```bash
 docker build -t nlp-service .
+docker run -p 80:80 nlp-service
 ```
 
 ## Example

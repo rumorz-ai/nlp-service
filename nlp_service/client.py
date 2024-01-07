@@ -1,9 +1,11 @@
 import os
 import time
+import traceback
 
 import nltk
 import aiohttp
 import numpy as np
+import requests
 from aiohttp import ClientTimeout
 
 from smartpy.utility.log_util import getLogger
@@ -47,38 +49,41 @@ class NLPService:
         self.base_url = base_url
         self.nltk_downloaded = False
 
-    async def _send_request(self, endpoint, data={}, timeout_seconds=10):
+    async def _async_request(self, endpoint, data={}, timeout_seconds=10):
         timeout = ClientTimeout(total=timeout_seconds)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.post(self.base_url + '/' + endpoint, json=data) as response:
                 return await response.json()
 
-    async def is_running(self):
+    def _request(self, endpoint, data={}, timeout_seconds=10):
+        url = self.base_url + '/' + endpoint
+        response = requests.post(url, json=data, timeout=timeout_seconds)
+        response.raise_for_status()
+        return response.json()
+
+    def _is_running(self):
         try:
-            result = await self._send_request('ping')
+            result = self._request('ping')
             if result['status'] == 'success':
                 return True
             else:
                 return False
         except Exception as e:
-            logger.debug(e)
+            logger.debug(traceback.format_exc(e))
             return False
 
-    async def check_api_status(self,
+    def check_api_status(self,
                                n_trials=10):
-
         i=0
         while i < n_trials:
             i += 1
-
             logger.info(f"Checking if NLP services are running... {i}")
-            if await self.is_running() is True:
+            if self._is_running() is True:
                 logger.info("NLP services are running")
                 return True
             else:
                 logger.info("Waiting for NLP services to start...")
                 time.sleep(10)
-
             if i == n_trials:
                  raise Exception("NLP services not running")
 
@@ -105,11 +110,11 @@ class NLPService:
                 'text': text,
                 'model': model,
             }
-            response = await self._send_request(endpoint='embeddings', data=data)
+            response = await self._async_request(endpoint='embeddings', data=data)
             if response['status'] != 'success':
                 raise ValueError(f'Error in response: {response}')
             else:
-                return np.array(response['data']['embeddings'])
+                return [np.array(i) for i in response['data']['embeddings']]
         elif self.source == self.CACHE:
             model = load_embedding_model(model=model)
             return model.encode(text)

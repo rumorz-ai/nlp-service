@@ -1,4 +1,5 @@
 import os
+from typing import Any, Union, List
 
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -44,18 +45,23 @@ async def ping():
 
 
 class EmbeddingsModel(BaseModel):
-    text: str
+    text: Union[str, List[str]]
     model: str = "sentence-transformers/all-MiniLM-L6-v2"
 
 @app.post("/embeddings")
 async def get_embeddings(embeddings_model: EmbeddingsModel):
     text = embeddings_model.text
     model = embeddings_model.model
+    if isinstance(text, str):
+        text = [text]
     model = load_embedding_model(model)
+    embeddings_list = []
+    for t in text:
+        embeddings_list.append(model.encode(t).tolist())
     return {
         "status": "success",
         "data":{
-            "embeddings": model.encode(text).tolist()
+            "embeddings": embeddings_list
         }
     }
 
