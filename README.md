@@ -1,3 +1,5 @@
+# NLP-service: a ready to deploy NLP microservice for CPU inference
+
 ## Why use an NLP Microservice?
 
 When deploying an app with NLP features to production, there are many considerations related to deployment:
@@ -32,22 +34,19 @@ docker run -p 80:80 nlp-service
 
 ## Example
 
-The repo includes a FastAPI app with an /embeddings endpoint, as well as a python client to call the service. If you don't want to rely on the microsevice, you can still call the NLP models by using source='local'. This will download the models to the specified cache directories and run the NLP task on the same processor as your app.
+The repo includes a FastAPI app with an /embeddings endpoint, as well as a python client to call the service. 
+If you don't want to rely on the microsevice, you can still call the NLP models by using the CACHE source. 
+This will download the models to the specified cache directories and run the NLP task on the same processor as your app.
 
 
 ```python
-nlp_service = NLPService()
-embeddings = loop.run_until_complete(nlp_service.get_embeddings("Your text here", source='app'))
-embeddings = loop.run_until_complete(nlp_service.get_embeddings("Your text here", source='local'))
+# API source
+nlp_service = NLPService(source=NLPService.API,
+                         base_url="http://your-api-endpoint")
+embeddings = await nlp_service.get_embeddings("Your text here")
+
+# Cache source
+nlp_service = NLPService(source=NLPService.CACHE)
+embeddings = await nlp_service.get_embeddings("Your text here")
 ```
 
-Deploy as Azure Container App 
-```
-az containerapp create \
-  --name nlp-service \
-  --resource-group rumorz \
-  --image rumorzimages.azurecr.io/nlp-service:latest \
-  --registry-server rumorzimages.azurecr.io \
-  --ingress external \
-  --target-port 2222
-```
