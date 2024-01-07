@@ -3,6 +3,5 @@ gunicorn
 uvicorn
 asgiref
 starlette
-nltk
 
 smartpy @ git+https://github.com/zozoheir/smartpy.git@releases

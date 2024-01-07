@@ -8,9 +8,9 @@ import numpy as np
 import requests
 from aiohttp import ClientTimeout
 
+from smartpy.utility import os_util
 from smartpy.utility.log_util import getLogger
 
-NLTK_CACHE_DIR = os.path.join(os.path.dirname(__file__), 'nltk_cache')
 SENTENCE_TRANSFORMERS_CACHE_DIR = os.path.join(os.path.dirname(__file__), 'sentence_transformers_cache')
 
 NLTK_RESOURCES = ['brown', 'wordnet', 'stopwords', 'punkt', 'words', 'vader_lexicon']
@@ -48,6 +48,7 @@ class NLPService:
         self.source = source
         self.base_url = base_url
         self.nltk_downloaded = False
+        self.nlp_cache_dir = os.environ.get('NLP_CACHE_DIR', os_util.getTempDir('nlp-service-cache'))
 
     async def _async_request(self, endpoint, data={}, timeout_seconds=10):
         timeout = ClientTimeout(total=timeout_seconds)
@@ -90,10 +91,10 @@ class NLPService:
     def _download_nltk(self,
                        resources=NLTK_RESOURCES):
         # Set NLTK_DIR to the current_dir
-        os.makedirs(os.environ['NLP_CACHE_DIR'], exist_ok=True)
-        nltk.data.path.append(os.environ['NLP_CACHE_DIR'])
+        os_util.ensureDir(self.nlp_cache_dir)
+        nltk.data.path.append(self.nlp_cache_dir)
         for res in resources:
-            nltk.download(res, download_dir=os.environ['NLP_CACHE_DIR'])
+            nltk.download(res, download_dir=self.nlp_cache_dir)
 
     @property
     def nltk(self):

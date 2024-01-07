@@ -1,6 +1,8 @@
 FROM python:3.10
 
 RUN pip install sentence-transformers
+RUN pip install nltk
+
 
 ENV NLP_CACHE_DIR=/app/nlp_cache
 

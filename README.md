@@ -40,13 +40,16 @@ This will download the models to the specified cache directories and run the NLP
 
 
 ```python
+
+DEFAULT_EMBEDDING_MODEL = 'sentence-transformers/all-MiniLM-L6-v2'
+
 # API source
 nlp_service = NLPService(source=NLPService.API,
                          base_url="http://your-api-endpoint")
-embeddings = await nlp_service.get_embeddings("Your text here")
+embeddings = await nlp_service.get_embeddings("Your text here", model=DEFAULT_EMBEDDING_MODEL)
 
 # Cache source
 nlp_service = NLPService(source=NLPService.CACHE)
-embeddings = await nlp_service.get_embeddings("Your text here")
+embeddings = await nlp_service.get_embeddings("Your text here", model=DEFAULT_EMBEDDING_MODEL)
 ```
 
