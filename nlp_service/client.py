@@ -1,3 +1,4 @@
+import asyncio
 import os
 import time
 import traceback
@@ -7,6 +8,7 @@ import aiohttp
 import numpy as np
 import requests
 from aiohttp import ClientTimeout
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 
 from smartpy.utility import os_util
 from smartpy.utility.log_util import getLogger
@@ -16,6 +18,9 @@ SENTENCE_TRANSFORMERS_CACHE_DIR = os.path.join(os.path.dirname(__file__), 'sente
 NLTK_RESOURCES = ['brown', 'wordnet', 'stopwords', 'punkt', 'words', 'vader_lexicon']
 
 logger = getLogger(__name__)
+
+exceptions_to_retry = (requests.exceptions.Timeout,
+                       asyncio.TimeoutError)
 
 
 # Lazy loading function
@@ -30,7 +35,6 @@ def load_embedding_model(model, cache_folder=SENTENCE_TRANSFORMERS_CACHE_DIR):
 
 
 class NLPService:
-
     CACHE = 'cache'
     API = 'api'
 
@@ -50,17 +54,28 @@ class NLPService:
         self.nltk_downloaded = False
         self.nlp_cache_dir = os.environ.get('NLP_CACHE_DIR', os_util.getTempDir('nlp-service-cache'))
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_fixed(3),
+        retry=retry_if_exception_type(exceptions_to_retry)
+    )
     async def _async_request(self, endpoint, data={}, timeout_seconds=10):
         timeout = ClientTimeout(total=timeout_seconds)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.post(self.base_url + '/' + endpoint, json=data) as response:
                 return await response.json()
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_fixed(3),
+        retry=retry_if_exception_type(exceptions_to_retry)
+    )
     def _request(self, endpoint, data={}, timeout_seconds=10):
         url = self.base_url + '/' + endpoint
         response = requests.post(url, json=data, timeout=timeout_seconds)
         response.raise_for_status()
         return response.json()
+
 
     def _is_running(self):
         try:
@@ -74,11 +89,15 @@ class NLPService:
             return False
 
     def check_api_status(self,
-                               n_trials=10):
-        i=0
+                         n_trials=3):
+        if self.source == self.CACHE:
+            return True
+        i = 0
         while i < n_trials:
             i += 1
             logger.info(f"Checking if NLP services are running... {i}")
+            logger.info(f"Base URL: {self.base_url}")
+            logger.info(f"Source: {self.source}")
             if self._is_running() is True:
                 logger.info("NLP services are running")
                 return True
@@ -86,7 +105,7 @@ class NLPService:
                 logger.info("Waiting for NLP services to start...")
                 time.sleep(10)
             if i == n_trials:
-                 raise Exception("NLP services not running")
+                raise Exception("NLP services not running")
 
     def _download_nltk(self,
                        resources=NLTK_RESOURCES):
@@ -102,6 +121,7 @@ class NLPService:
             self._download_nltk()
             self.nltk_downloaded = True
         return nltk
+
 
     async def get_embeddings(self,
                              text,
@@ -119,4 +139,3 @@ class NLPService:
         elif self.source == self.CACHE:
             model = load_embedding_model(model=model)
             return model.encode(text)
-
