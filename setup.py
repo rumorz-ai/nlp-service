@@ -6,5 +6,8 @@ setup(
     description='NLP Service',
     packages=find_packages(),
     author='Othmane Zoheir',
-    author_email='zozoheir@umich.edu',
+    author_email='othmane@rumorz.io',
+    install_requires=[
+        'nltk',
+    ],
 )
