@@ -3,5 +3,4 @@ gunicorn
 uvicorn
 asgiref
 starlette
-
 smartpy @ git+https://github.com/zozoheir/smartpy.git@releases
