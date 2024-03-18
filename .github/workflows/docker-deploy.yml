@@ -32,3 +32,13 @@ jobs:
         docker tag nlp-service rumorz.azurecr.io/nlp-service
         docker push rumorz.azurecr.io/nlp-service
 
+    - name: Deploy to Azure Container Instances
+      uses: azure/aci-deploy@v1
+      with:
+        resource-group: rumorz
+        image: rumorz.azurecr.io/nlp-service
+        registry-login-server: rumorz.azurecr.io
+        registry-username: rumorz
+        registry-password: C31iv1qoM/ydq4ILngyfaKEibXWrVcB6vxI5rxKRY2+ACRAAKLCx
+        name: nlp-service
+        location: 'west us'
