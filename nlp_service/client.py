@@ -1,3 +1,5 @@
+import numpy as np
+import requests  # Assuming requests is used for synchronous HTTP requests
 import asyncio
 import os
 import time
@@ -122,10 +124,26 @@ class NLPService:
             self.nltk_downloaded = True
         return nltk
 
+    def get_embeddings(self, text, model='sentence-transformers/all-MiniLM-L6-v2') -> np.array:
+        if self.source == self.API:
+            data = {
+                'text': text,
+                'model': model,
+            }
+            response = requests.post(url=self.base_url + '/embeddings', json=data)
+            response_json = response.json()
+            if response.status_code != 200 or response_json['status'] != 'success':
+                raise ValueError(f'Error in response: {response_json}')
+            else:
+                return [np.array(i) for i in response_json['data']['embeddings']]
+        elif self.source == self.CACHE:
+            model = load_embedding_model(model=model)
+            return [model.encode(text)]
 
-    async def get_embeddings(self,
-                             text,
-                             model='sentence-transformers/all-MiniLM-L6-v2') -> np.array:
+
+    async def async_get_embeddings(self,
+                                   text,
+                                   model='sentence-transformers/all-MiniLM-L6-v2') -> np.array:
         if self.source == self.API:
             data = {
                 'text': text,
@@ -138,4 +156,4 @@ class NLPService:
                 return [np.array(i) for i in response['data']['embeddings']]
         elif self.source == self.CACHE:
             model = load_embedding_model(model=model)
-            return model.encode(text)
+            return [model.encode(text)]

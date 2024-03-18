@@ -38,7 +38,6 @@ The repo includes a FastAPI app with an /embeddings endpoint, as well as a pytho
 If you don't want to rely on the microsevice, you can still call the NLP models by using the CACHE source. 
 This will download the models to the specified cache directories and run the NLP task on the same processor as your app.
 
-
 ```python
 
 DEFAULT_EMBEDDING_MODEL = 'sentence-transformers/all-MiniLM-L6-v2'
@@ -46,10 +45,10 @@ DEFAULT_EMBEDDING_MODEL = 'sentence-transformers/all-MiniLM-L6-v2'
 # API source
 nlp_service = NLPService(source=NLPService.API,
                          base_url="http://your-api-endpoint")
-embeddings = await nlp_service.get_embeddings("Your text here", model=DEFAULT_EMBEDDING_MODEL)
+embeddings = await nlp_service.async_get_embeddings("Your text here", model=DEFAULT_EMBEDDING_MODEL)
 
 # Cache source
 nlp_service = NLPService(source=NLPService.CACHE)
-embeddings = await nlp_service.get_embeddings("Your text here", model=DEFAULT_EMBEDDING_MODEL)
+embeddings = await nlp_service.async_get_embeddings("Your text here", model=DEFAULT_EMBEDDING_MODEL)
 ```
 

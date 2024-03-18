@@ -16,8 +16,8 @@ jobs:
       uses: azure/docker-login@v1
       with:
         login-server: rumorzimages.azurecr.io
-        username: rumorzimages
-        password: T8j47cGTx77+7+c4/xePDz9+1LnHGiLHYQbbUGwK0E+ACRAFROhx
+        username: rumorz
+        password: C31iv1qoM/ydq4ILngyfaKEibXWrVcB6vxI5rxKRY2+ACRAAKLCx
 
     - uses: actions/cache@v3
       with:
@@ -30,4 +30,4 @@ jobs:
       run: |
         docker build -t nlp-service .
         docker tag nlp-service rumorzimages.azurecr.io/nlp-service
-        docker push rumorzimages.azurecr.io/nlp-service
+        docker push rumorz.azurecr.io/nlp-service

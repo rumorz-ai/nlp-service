@@ -19,7 +19,7 @@ class TestClient(unittest.TestCase):
 
     def test_local_client(self):
         nlp_service = NLPService(source=NLPService.CACHE)
-        embeddings = self.loop.run_until_complete(nlp_service.get_embeddings("Your text here"))
+        embeddings = self.loop.run_until_complete(nlp_service.async_get_embeddings("Your text here"))
         self.assertTrue(len(embeddings) > 0)
 
     def test_api_client(self):
