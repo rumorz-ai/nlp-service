@@ -15,7 +15,7 @@ jobs:
     - name: Login to Azure Container Registry
       uses: azure/docker-login@v1
       with:
-        login-server: rumorzimages.azurecr.io
+        login-server: rumorz.azurecr.io
         username: rumorz
         password: C31iv1qoM/ydq4ILngyfaKEibXWrVcB6vxI5rxKRY2+ACRAAKLCx
 
