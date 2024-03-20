@@ -1,11 +1,8 @@
-import numpy as np
-import requests  # Assuming requests is used for synchronous HTTP requests
 import asyncio
 import os
 import time
 import traceback
 
-import nltk
 import aiohttp
 import numpy as np
 import requests
@@ -111,6 +108,8 @@ class NLPService:
 
     def _download_nltk(self,
                        resources=NLTK_RESOURCES):
+        import nltk
+
         # Set NLTK_DIR to the current_dir
         os_util.ensureDir(self.nlp_cache_dir)
         nltk.data.path.append(self.nlp_cache_dir)
@@ -119,6 +118,7 @@ class NLPService:
 
     @property
     def nltk(self):
+        import nltk
         if not self.nltk_downloaded:
             self._download_nltk()
             self.nltk_downloaded = True
