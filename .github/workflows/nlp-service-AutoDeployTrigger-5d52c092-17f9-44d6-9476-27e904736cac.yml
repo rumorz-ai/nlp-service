@@ -21,21 +21,19 @@ jobs:
       - name: Checkout to the branch
         uses: actions/checkout@v2
 
-      - name: Azure Login
-        uses: azure/login@v1
+      - name: Login to Azure Container Registry
+        uses: azure/docker-login@v1
         with:
-          creds: ${{ secrets.NLPSERVICE_AZURE_CREDENTIALS }}
+          login-server: rumorz.azurecr.io
+          username: rumorz
+          password: C31iv1qoM/ydq4ILngyfaKEibXWrVcB6vxI5rxKRY2+ACRAAKLCx
 
-      - name: Build and push container image to registry
-        uses: azure/container-apps-deploy-action@v2
-        with:
-          registryUrl: rumorzcontainers.azurecr.io
-          registryUsername: ${{ secrets.NLPSERVICE_REGISTRY_USERNAME }}
-          registryPassword: ${{ secrets.NLPSERVICE_REGISTRY_PASSWORD }}
-          resourceGroup: rumorz-app-prod
-          imageToBuild: rumorzcontainers.azurecr.io/nlp-service:${{ github.sha }}
-          
-            
+      - name: Build and Push Docker image
+        run: |
+          docker build -t nlp-service .
+          docker tag nlp-service rumorzcontainers.azurecr.io/nlp-service:${{ github.sha }}
+          docker push rumorzcontainers.azurecr.io/nlp-service:${{ github.sha }}
+
 
      
 
