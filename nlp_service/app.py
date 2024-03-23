@@ -8,6 +8,8 @@ from starlette.responses import JSONResponse
 
 from fastapi import FastAPI
 
+from smartpy.utility import os_util
+
 app = FastAPI()
 origins = [
     "*",
@@ -47,14 +49,13 @@ async def ping():
 
 class EmbeddingsModel(BaseModel):
     text: str
-    model: str
-    cache_dir: str
+    model: str = "sentence-transformers/all-MiniLM-L6-v2"
 
 @app.post("/embeddings")
 async def get_embeddings(embeddings_model: EmbeddingsModel):
     text = embeddings_model.text
     model = embeddings_model.model
-    cache_dir = embeddings_model.cache_dir
+    cache_dir = os_util.getTempDir('sentence_transformers_cache')
     model = load_embedding_model(model, cache_dir)
     return {
         "status": "success",
@@ -67,4 +68,4 @@ async def get_embeddings(embeddings_model: EmbeddingsModel):
 if __name__ == "__main__":
     uvicorn.run(app,
                 host="0.0.0.0",
-                port=2222)
+                port=80)
