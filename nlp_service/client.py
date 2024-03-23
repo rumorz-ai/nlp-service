@@ -84,7 +84,7 @@ class NLPService:
             else:
                 return False
         except Exception as e:
-            logger.debug(traceback.format_exc(e))
+            logger.debug(traceback.format_exc())
             return False
 
     def check_api_status(self,
