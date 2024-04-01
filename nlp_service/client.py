@@ -102,7 +102,7 @@ class NLPService:
                 return True
             else:
                 logger.info("Waiting for NLP services to start...")
-                time.sleep(10)
+                time.sleep(1)
             if i == n_trials:
                 raise Exception("NLP services not running")
 
@@ -125,17 +125,15 @@ class NLPService:
         return nltk
 
     def get_embeddings(self, text, model='sentence-transformers/all-MiniLM-L6-v2') -> np.array:
-        if self.source == self.API:
+        if self.API in self.source:
             data = {
                 'text': text,
                 'model': model,
             }
             response = requests.post(url=self.base_url + '/embeddings', json=data)
+            response.raise_for_status()
             response_json = response.json()
-            if response.status_code != 200 or response_json['status'] != 'success':
-                raise ValueError(f'Error in response: {response_json}')
-            else:
-                return [np.array(i) for i in response_json['data']['embeddings']]
+            return [np.array(i) for i in response_json['data']['embeddings']]
         elif self.source == self.CACHE:
             model = load_embedding_model(model=model)
             return [model.encode(text)]
@@ -144,7 +142,7 @@ class NLPService:
     async def async_get_embeddings(self,
                                    text,
                                    model='sentence-transformers/all-MiniLM-L6-v2') -> np.array:
-        if self.source == self.API:
+        if self.API in self.source:
             data = {
                 'text': text,
                 'model': model,

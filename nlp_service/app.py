@@ -9,6 +9,8 @@ from starlette.responses import JSONResponse
 
 from fastapi import FastAPI
 
+from smartpy.utility import os_util
+
 app = FastAPI()
 origins = [
     "*",
@@ -34,7 +36,7 @@ def load_embedding_model(model):
         from sentence_transformers import SentenceTransformer
         load_embedding_model.model = SentenceTransformer(
             model,
-            os.environ['NLP_CACHE_DIR']
+            os_util.getTempDir('nlp-service-cache')
         )
     return load_embedding_model.model
 
