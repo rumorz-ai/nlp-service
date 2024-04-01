@@ -1,0 +1,35 @@
+name: Trigger auto deployment for nlp-service
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches:
+      [ prod ]
+    paths:
+    - '**'
+    - '.github/workflows/nlp-service-AutoDeployTrigger-5d52c092-17f9-44d6-9476-27e904736cac.yml'
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Login to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: rumorzcontainers.azurecr.io
+          username: rumorzcontainers
+          password: Mw3mpMK4hOzp2TevaVbAPVhp/VXB5IGpDoO9DgjdRx+ACRC+omXn
+
+      - name: Build and Push Docker image
+        run: |
+          docker build -t nlp-service .
+          docker tag nlp-service rumorzcontainers.azurecr.io/nlp-service:${{ github.sha }}
+          docker push rumorzcontainers.azurecr.io/nlp-service:${{ github.sha }}
