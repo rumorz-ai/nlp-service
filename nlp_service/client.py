@@ -134,10 +134,11 @@ class NLPService:
             if response.status_code != 200:
                 response.raise_for_status()
             else:
-                return [np.array(i) for i in response.json()['data']['embeddings']]
+                return response.json()['data']['embeddings']
+
         elif self.source == self.CACHE:
             model = load_embedding_model(model=model)
-            return [model.encode(text)]
+            return model.encode(text)
 
 
     async def async_get_embeddings(self,
