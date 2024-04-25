@@ -55,7 +55,7 @@ class EmbeddingsModel(BaseModel):
 async def get_embeddings(embeddings_model: EmbeddingsModel):
     text = embeddings_model.text
     model = embeddings_model.model
-    cache_dir = os_util.getTempDir('sentence_transformers_cache')
+    cache_dir = os_util.getTempDir('nlp-service-cache')
     model = load_embedding_model(model, cache_dir)
     return {
         "status": "success",
