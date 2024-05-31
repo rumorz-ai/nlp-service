@@ -1,13 +1,10 @@
-# NLP service models cache
-*nltk_cache
-*sentence_transformers_cache
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
+*sentence_transformers_cache
 *.py[cod]
 *$py.class
 *DS_Store
-
+*egg-info
 # C extensions
 *.so
 
